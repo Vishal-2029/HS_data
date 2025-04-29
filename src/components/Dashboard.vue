@@ -222,7 +222,7 @@ export default {
                     return;
                 }
 
-                // this.isLoading = true;
+                this.isLoading = true;
                 const [
                     responsePosition,
                     responseOrder,
@@ -280,7 +280,7 @@ export default {
                         },
                     }),
                 ]);
-                // this.isLoading = false;
+                this.isLoading = false;
 
                 // Extract values from response
                 const trades = responseTrades.data.data.length;
