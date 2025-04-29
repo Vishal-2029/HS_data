@@ -66,8 +66,7 @@ export default {
 };
 </script>
 
-
-<style scoped>
+<style >
 .container {
   background: #f4f7f5;
   max-width: 420px;
@@ -117,5 +116,4 @@ button:hover {
   background-color: #388e3c;
 }
 </style>
-
 

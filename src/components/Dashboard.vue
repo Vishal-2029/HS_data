@@ -372,7 +372,9 @@ export default {
 .main-container {
     display: flex;
     background: #ffffff;
-    padding: 20px;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* Account Section Style */
@@ -380,41 +382,44 @@ export default {
     width: 300px;
     height: 87vh;
     overflow-y: auto;
-    border-radius: 8px;
-    border: 4px solid #ddd;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    border: 5px solid #ddd;
+    background: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     padding: 20px;
+
 }
 
 .account-item {
-    padding: 10px;
-    margin-bottom: 8px;
-    background-color: #f2f2f2;
-    border-radius: 5px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background-color: #f7f7f7;
+    border-radius: 15px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .account-item.selected {
-    outline: 2px solid #007bff;
-    background-color: #e6f0ff;
+    outline: 3px solid #80deea;
+    background-color: #e1f5fe;
+    transform: scale(1.03);
 }
 
 .account-details {
-    margin-top: 5px;
-    padding-left: 10px;
+    margin-top: 6px;
+    padding-left: 12px;
     font-size: 14px;
-    color: #444;
+    color: #7b8d8e;
 }
 
 /* object Section Style */
 .object-detail {
-    margin-left: 20px;
-    padding: 20px;
-    border-radius: 8px;
-    border: 4px solid #ddd;
-    background: #fff;
+    margin-left: 24px;
+    padding: 25px;
+    border-radius: 16px;
+    border: 5px solid #ddd;
+    background: #ffffff;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
     flex: 1;
 }
 
@@ -422,70 +427,67 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-
 }
 
 .object-detail-header h2 {
     margin: 0;
-    color: #333;
-    font-size: 20px;
+    color: #388e3c;
+    font-size: 22px;
 }
 
 .object-detail-header button {
-    padding: 5px 10px;
-    width: 100px;
+    padding: 6px 14px;
     background-color: transparent;
-    color: #000;
-    border: 1px solid #007bff;
-    border-radius: 5px;
+    color: #388e3c;
+    border: 2px solid #388e3c;
+    border-radius: 12px;
     cursor: pointer;
     text-decoration: none;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .object-detail-header button:hover {
-    background-color: #f6f6f6;
+    background-color: #ffffff;
+    transform: scale(1.05);
 }
 
+/* List Group Styles */
 .list-group {
     display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: 18px;
+    margin-bottom: 24px;
 }
 
 .total-orders-item,
 .balance-item,
 .profit-item {
-    padding: 15px;
-    background-color: #f0f8ff;
-    border-radius: 8px;
+    padding: 20px;
+    background-color: #e8f5e9;
+    border-radius: 15px;
     flex: 1;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
 }
 
 .total-orders-item h3,
 .balance-item h3,
 .profit-item h3 {
-    margin-bottom: 10px;
-    color: #333;
+    margin-bottom: 12px;
+    color: #388e3c;
 }
 
-/* Chart Section Style*/
+/* Chart Section Style */
 .charts {
     display: flex;
     gap: 20px;
+    margin-top: 30px;
 }
 
-.line-chart {
-    background: #fff;
-    border-radius: 10px;
-    padding: 10px;
-}
-
+.line-chart,
 .donut-chart {
-    background: #fff;
-    border-radius: 10px;
-    padding: 10px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* Fade Animation */
@@ -499,7 +501,7 @@ export default {
     opacity: 0;
 }
 
-/* Animation */
+/* Slide-in Animation */
 .slide-fade-enter-active {
     transition: all 0.5s ease;
 }
@@ -558,7 +560,7 @@ export default {
 }
 
 @media (max-width: 600px) {
-    .account-container{
+    .account-container {
         height: 70vh;
         width: 100%;
         overflow-y: auto;
