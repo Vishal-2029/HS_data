@@ -1,65 +1,69 @@
 <template>
-<div class="main-container">
+<div class="main-container wrapper">
     <Loader v-if="isLoading" />
 
     <!-- Accounts Section -->
     <div class="account-container">
         <h1>Accounts</h1>
         <div v-if="accounts.length > 0">
-            <div v-for="account in accounts" :key="account.id" class="account-item" tabindex="0" @click="showDetails(account)">
+            <div v-for="account in accounts" :key="account.id" class="account-item" :class="{ selected: selectedAccountId === account.id }" @click="showDetails(account)">
                 <div>{{ account.user_id }}</div>
-                <div v-if="selectedAccountId === account.id" class="account-details">
-                    <div>Balance: {{ formatCurrency(detailObj.balance) }}</div>
-                    <div>Profit: {{ formatCurrency(detailObj.profit) }}</div>
-                </div>
+                <transition name="fade">
+                    <div v-if="selectedAccountId === account.id" class="account-details">
+                        <div>Balance: {{ formatCurrency(detailObj.balance) }}</div>
+                        <div>Profit: {{ formatCurrency(detailObj.profit) }}</div>
+                    </div>
+                </transition>
             </div>
         </div>
         <p v-else>No accounts found.</p>
     </div>
 
     <!-- Order Details Section -->
-    <div class="object-detail">
-        <div class="object-detail-header">
-            <h2>Order Details</h2>
-            <a href="/">LogOut</a>
+    <transition name="slide-fade">
+        <div class="object-detail">
+            <div class="object-detail-header">
+                <h2>Order Details</h2>
+                <button @click="logout">LogOut</button>
+            </div>
+            <br />
+            <div class="list-group">
+                <div class="total-orders-item">
+                    <h3>Total Orders Positions</h3>
+                    <p>{{ detailObj.positions?.length || 0 }}</p>
+                </div>
+
+                <div class="total-orders-item">
+                    <h3>Total Orders</h3>
+                    <p>{{ detailObj.orders?.length || 0 }}</p>
+                </div>
+
+                <div class="balance-item">
+                    <h3>Balance</h3>
+                    <p>{{ formatCurrency(detailObj.balance) }}</p>
+                </div>
+
+                <div class="profit-item">
+                    <h3>Total Profit</h3>
+                    <p>{{ formatCurrency(detailObj.profit) }}</p>
+                </div>
+            </div>
+
+            <!-- Chart Section -->
+            <div class="charts">
+
+                <div class="line-chart" style="flex: 2">
+                    <h3>Positions, Orders, and Deals Trend</h3>
+                    <apexchart type="line" height="350" :options="chartOptions" :series="series" />
+                </div>
+
+                <div class="donut-chart" style="flex: 1; background: #f9f9f9; border-radius: 10px; padding: 10px;">
+                    <h3>Trade & Pending Order</h3>
+                    <apexchart type="radialBar" height="350" :options="donutChartOptions" :series="donutChartSeries" />
+                </div>
+            </div>
         </div>
-        <br />
-        <div class="list-group">
-            <div class="total-orders-item">
-                <h3>Total Orders Positions</h3>
-                <p>{{ detailObj.positions?.length || 0 }}</p>
-            </div>
-
-            <div class="total-orders-item">
-                <h3>Total Orders</h3>
-                <p>{{ detailObj.orders?.length || 0 }}</p>
-            </div>
-
-            <div class="balance-item">
-                <h3>Balance</h3>
-                <p>{{ formatCurrency(detailObj.balance) }}</p>
-            </div>
-
-            <div class="profit-item">
-                <h3>Total Profit</h3>
-                <p>{{ formatCurrency(detailObj.profit) }}</p>
-            </div>
-        </div>
-
-        <!-- Chart Section -->
-        <div class="charts">
-
-            <div class="line-chart" style="flex: 2">
-                <h3>Positions, Orders, and Deals Trend</h3>
-                <apexchart type="line" height="350" :options="chartOptions" :series="series" />
-            </div>
-
-            <div class="donut-chart" style="flex: 1; background: #f9f9f9; border-radius: 10px; padding: 10px;">
-                <h3>Trade & Pending Order</h3>
-                <apexchart type="radialBar" height="350" :options="donutChartOptions" :series="donutChartSeries" />
-            </div>
-        </div>
-    </div>
+    </transition>
 </div>
 </template>
 
@@ -87,6 +91,7 @@ export default {
                     type: 'line',
                     height: 350,
                 },
+
                 stroke: {
                     curve: 'smooth',
                     width: 2,
@@ -166,6 +171,7 @@ export default {
     },
 
     methods: {
+
         // Accounts section
         async fetchAccounts() {
             this.isLoading = true;
@@ -202,6 +208,11 @@ export default {
             await this.fetchOrdersAndPositions(account.id);
         },
 
+        logout() {
+            localStorage.removeItem('token');
+            this.$router.push('/');
+        },
+
         // Orders,Positions and Deals section
         async fetchOrdersAndPositions(accountId) {
             try {
@@ -211,7 +222,7 @@ export default {
                     return;
                 }
 
-                this.isLoading = true;
+                // this.isLoading = true;
                 const [
                     responsePosition,
                     responseOrder,
@@ -269,7 +280,7 @@ export default {
                         },
                     }),
                 ]);
-                this.isLoading = false;
+                // this.isLoading = false;
 
                 // Extract values from response
                 const trades = responseTrades.data.data.length;
@@ -304,7 +315,6 @@ export default {
                 console.error('Error fetching data:', error);
             }
         },
-
 
         //line chart Update
         updateChart() {
@@ -358,7 +368,6 @@ export default {
 </script>
 
 <style scoped>
-
 /* main-container Style */
 .main-container {
     display: flex;
@@ -387,7 +396,7 @@ export default {
     transition: background-color 0.3s ease;
 }
 
-.account-item:focus {
+.account-item.selected {
     outline: 2px solid #007bff;
     background-color: #e6f0ff;
 }
@@ -412,7 +421,7 @@ export default {
 .object-detail-header {
     display: flex;
     justify-content: space-between;
-    align-items: center; 
+    align-items: center;
 
 }
 
@@ -422,9 +431,10 @@ export default {
     font-size: 20px;
 }
 
-.object-detail-header a {
+.object-detail-header button {
     padding: 5px 10px;
-    background-color:transparent;
+    width: 100px;
+    background-color: transparent;
     color: #000;
     border: 1px solid #007bff;
     border-radius: 5px;
@@ -433,7 +443,7 @@ export default {
     transition: background-color 0.3s ease;
 }
 
-.object-detail-header a:hover {
+.object-detail-header button:hover {
     background-color: #f6f6f6;
 }
 
@@ -476,5 +486,100 @@ export default {
     background: #fff;
     border-radius: 10px;
     padding: 10px;
+}
+
+/* Fade Animation */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.4s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+/* Animation */
+.slide-fade-enter-active {
+    transition: all 0.5s ease;
+}
+
+.slide-fade-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.slide-fade-leave-active {
+    transition: all 0.3s ease;
+}
+
+.slide-fade-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .main-container {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .account-container {
+        width: 100%;
+        height: 70vh;
+        margin-bottom: 20px;
+        overflow-y: auto;
+    }
+
+    .object-detail {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .list-group {
+        flex-direction: column;
+    }
+
+    .charts {
+        flex-direction: column;
+    }
+
+    .line-chart,
+    .donut-chart {
+        width: 100%;
+    }
+
+    .object-detail-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 600px) {
+    .account-container{
+        height: 70vh;
+        width: 100%;
+        overflow-y: auto;
+    }
+
+    .account-item {
+        font-size: 14px;
+    }
+
+    .account-details {
+        font-size: 12px;
+    }
+
+    .total-orders-item h3,
+    .balance-item h3,
+    .profit-item h3 {
+        font-size: 16px;
+    }
+
+    .object-detail-header h2 {
+        font-size: 18px;
+    }
 }
 </style>

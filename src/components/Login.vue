@@ -66,64 +66,56 @@ export default {
 };
 </script>
 
-<style>
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
+<style scoped>
 .container {
-  max-width: 400px;
+  background: #f4f7f5;
+  max-width: 420px;
   margin: 100px auto;
-  padding: 30px;
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  animation: fadeIn 0.6s ease-out;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 10px 10px 20px #d1d5d2, -10px -10px 20px #ffffff;
   text-align: center;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 h1 {
-  margin-bottom: 20px;
-  color: #333;
+  font-size: 22px;
+  color: #2e7d32;
+  margin-bottom: 25px;
 }
 
 input[type='text'],
 input[type='password'] {
   width: 100%;
-  padding: 12px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  padding: 14px;
+  margin-bottom: 20px;
+  background: #f4f7f5;
+  border: none;
+  border-radius: 12px;
+  box-shadow: inset 4px 4px 8px #d1d5d2, inset -4px -4px 8px #ffffff;
   font-size: 14px;
-  transition: all 0.3s ease;
 }
 
 input:focus {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
   outline: none;
+  box-shadow: 0 0 0 2px #81c784;
 }
 
 button {
-  background-color: #4f46e5;
-  color: white;
-  padding: 12px 24px;
+  padding: 12px 30px;
+  background-color: #66bb6a;
   border: none;
-  border-radius: 6px;
-  font-size: 16px;
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: background 0.3s ease;
 }
 
 button:hover {
-  background-color: #4338ca;
-  transform: translateY(-2px);
+  background-color: #388e3c;
 }
 </style>
+
+
