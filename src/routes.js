@@ -44,17 +44,23 @@ router.beforeEach((to, from, next) => {
     const token = localStorage.getItem('token');
     const isAuthenticated = token !== null && token !== '';
 
+    // Always show Login page on root URL
+    if (to.path === '/') {
+        return next();
+    }
+
+    // If route requires guest and user is authenticated, redirect to dashboard
     if (to.meta.requiresGuest && isAuthenticated) {
         return next({ name: 'Dashboard' });
     }
 
+    // If route requires auth and user is not authenticated, redirect to login
     if (to.meta.requiresAuth && !isAuthenticated) {
         return next({ name: 'Login' });
     }
 
-    
-
     next();
 });
+
 
 export default router;
