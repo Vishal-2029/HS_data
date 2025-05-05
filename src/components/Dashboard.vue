@@ -4,14 +4,22 @@
 
     <!-- Accounts Section -->
     <div class="account-container">
+
         <h1>Accounts</h1>
         <div v-if="accounts.length > 0">
             <div v-for="account in accounts" :key="account.id" class="account-item" :class="{ selected: selectedAccountId === account.id }" @click="showDetails(account)">
+
                 <div>{{ account.user_id }}</div>
+
                 <transition name="fade">
                     <div v-if="selectedAccountId === account.id" class="account-details">
-                        <div>Balance: {{ formatCurrency(detailObj.balance) }}</div>
-                        <div>Profit: {{ formatCurrency(detailObj.profit) }}</div>
+                        <div>
+                            <div>Balance: {{ formatCurrency(detailObj.balance) }}</div>
+                            <div>Profit: {{ formatCurrency(detailObj.profit) }}</div>
+                        </div>
+                        <div>
+                            <div class="img-1" @click.stop="img"><img :src="Image"></div>
+                        </div>
                     </div>
                 </transition>
             </div>
@@ -71,6 +79,9 @@
 import axios from 'axios';
 import VueApexCharts from 'vue3-apexcharts';
 import Loader from './Loader.vue';
+import {
+    mapGetters
+} from 'vuex'
 
 export default {
     name: 'DASHBOARD',
@@ -138,6 +149,8 @@ export default {
                     data: [],
                 },
             ],
+
+            Image: require("../assets/time-to-market.gif"),
 
             // Donut Chart Options
             donutChartOptions: {
@@ -213,6 +226,10 @@ export default {
             this.$router.push('/');
         },
 
+        img() {
+            this.$router.push('/userchart/' + this.selectedAccountId);
+        },
+
         // Orders,Positions and Deals section
         async fetchOrdersAndPositions(accountId) {
             try {
@@ -220,7 +237,7 @@ export default {
                 if (!tokenString) {
                     console.error('No token found. Please log in.');
                     return;
-                }
+                } 
 
                 this.isLoading = true;
                 const [
@@ -229,6 +246,7 @@ export default {
                     responseDeals,
                     responseTrades,
                     responsePending,
+                    responseSymbols,
                 ] = await Promise.all([
                     axios.get(`https://dev.hstrader.com/api/v1/positions/accounts/${accountId}`, {
                         headers: {
@@ -279,6 +297,11 @@ export default {
                             active: 'true',
                         },
                     }),
+                    axios.get(`https://dev.hstrader.com/api/v1/symbols/accounts/${accountId}`, {
+                        headers: {
+                            Authorization: `Bearer ${tokenString}`,
+                        },
+                    }),
                 ]);
                 this.isLoading = false;
 
@@ -296,6 +319,9 @@ export default {
                 console.log('Trades:', trades);
                 console.log('Pending:', pending);
 
+                
+                this.$store.dispatch('setSymbols', responseSymbols.data.data);
+
                 // Total profit calculation
                 let totalProfit = 0;
                 positions.forEach((position) => {
@@ -307,7 +333,7 @@ export default {
                 this.detailObj.deals = deals;
                 this.detailObj.profit = totalProfit;
 
-                // Update the donut chart series
+                // Update the donut chart series 
                 this.donutChartSeries = [trades, pending];
 
                 this.updateChart();
@@ -364,12 +390,16 @@ export default {
     mounted() {
         this.fetchAccounts();
     },
+    computed: {
+        ...mapGetters(['count']),
+    },
 };
 </script>
 
 <style scoped>
 /* main-container Style */
 .main-container {
+height: 90vh;
     display: flex;
     background: #ffffff;
     padding: 30px;
@@ -380,8 +410,8 @@ export default {
 /* Account Section Style */
 .account-container {
     width: 300px;
-    height: 87vh;
     overflow-y: auto;
+
     border-radius: 12px;
     border: 5px solid #ddd;
     background: #ffffff;
@@ -407,9 +437,19 @@ export default {
 
 .account-details {
     margin-top: 6px;
-    padding-left: 12px;
+    padding: 12px;
     font-size: 14px;
     color: #7b8d8e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+}
+
+.account-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 /* object Section Style */
@@ -475,18 +515,35 @@ export default {
     color: #388e3c;
 }
 
+/* img */
+
+.img-1 {
+    width: 30px;
+    height: 30px;
+    overflow: hidden;
+    margin-left: 10px;
+    display: flex;
+    border-radius: 5px;
+    flex-direction: row;
+}
+
+.img-1 img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
 /* Chart Section Style */
 .charts {
     display: flex;
     gap: 20px;
-    margin-top: 30px;
 }
 
 .line-chart,
 .donut-chart {
     background: #ffffff;
-    border-radius: 16px;
-    padding: 16px;
+    border-radius: 16px; 
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
 }
 
