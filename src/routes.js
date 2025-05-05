@@ -14,13 +14,15 @@ const routes = [
         name: 'Dashboard',
         path: '/dashboard',
         component: Dashboard,
-        meta: { requiresAuth: true },
-        beforeEnter: (to, from, next) => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                return next({ name: 'Login' });
-            }
-            next();
+        meta: { 
+            requiresAuth: true ,
+            beforeEnter: (to, from, next) => {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    return next({ name: 'Login' });
+                }
+                next();
+                }
         }
     },
     
