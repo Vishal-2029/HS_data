@@ -89,6 +89,8 @@ export default {
         apexchart: VueApexCharts,
         Loader,
     },
+
+    
     data() {
         return {
             accounts: [],
