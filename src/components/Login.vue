@@ -3,23 +3,38 @@
     <h1>Login to Your Account</h1>
     <form class="form" @submit.prevent="submitForm">
       <div>
-        <input type="text" id="user" v-model="formData.username" placeholder="Username" required/>
+        <input
+          type="text"
+          id="user"
+          v-model="formData.username"
+          placeholder="Username"
+          required
+        />
       </div>
       <br />
       <div>
-        <input type="password" id="password" v-model="formData.password" placeholder="Password" required/>
+        <input
+          type="password"
+          id="password"
+          v-model="formData.password"
+          placeholder="Password"
+          required
+        />
       </div>
       <br />
       <button type="submit">LOGIN</button>
-      <p v-if="message" style="color: red; margin-top: 10px">{{ message }}</p>
+      <p v-if="message" style="color: red; margin-top: 10px">
+        {{ message }}
+      </p>
     </form>
   </div>
 </template>
 
 <script>
+const BASE_URL = process.env.VUE_APP_API_BASE_URL;
+
 export default {
   name: 'LOGIN',
-
   data() {
     return {
       formData: {
@@ -29,34 +44,28 @@ export default {
       message: '',
     };
   },
-
   methods: {
     async submitForm() {
       try {
-        const response = await fetch('https://dev.hstrader.com/auth/v1/oauth2/login', {
+        const response = await fetch(`${BASE_URL}/auth/v1/oauth2/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Basic ' + btoa(`${this.formData.username}:${this.formData.password}`),
+            Authorization:
+              'Basic ' +
+              btoa(`${this.formData.username}:${this.formData.password}`),
           },
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
+          this.message = data.message || 'Login failed';
           throw new Error('Login failed');
         }
 
-        const data = await response.json();
-    console.log('Login response:', data);
-
-    if (response.ok ) {
-      console.log("Token",data)
-      localStorage.setItem('token', data.data.access_token);
-      this.$router.push('/dashboard');
-    } else {
-      this.message = data.message 
-    }
-
-
+        localStorage.setItem('token', data.data.access_token);
+        this.$router.push('/dashboard');
       } catch (error) {
         console.error('Error during login:', error);
         this.message = 'An error occurred during login.';
@@ -66,7 +75,8 @@ export default {
 };
 </script>
 
-<style >
+
+<style>
 .container {
   background: #f4f7f5;
   max-width: 420px;
@@ -116,4 +126,3 @@ button:hover {
   background-color: #388e3c;
 }
 </style>
-

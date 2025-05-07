@@ -1,0 +1,233 @@
+
+/* main-container Style */
+.main-container {
+    height: 90vh;
+    display: flex;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Account Section Style */
+.account-container {
+    width: 300px;
+    overflow-y: auto;
+
+    border-radius: 12px;
+    border: 5px solid #ddd;
+    background: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+
+}
+
+.account-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.account-item {
+    padding: 12px;
+    margin-bottom: 12px;
+    background-color: #f7f7f7;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.account-item.selected {
+    outline: 3px solid #80deea;
+    background-color: #e1f5fe;
+    transform: scale(1.03);
+}
+
+.account-details {
+    margin-top: 6px;
+    padding: 12px;
+    font-size: 14px;
+    color: #7b8d8e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+}
+
+.account-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* object Section Style */
+.object-detail {
+    margin-left: 24px;
+    padding: 25px;
+    border-radius: 16px;
+    border: 5px solid #ddd;
+    background: #ffffff;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+    flex: 1;
+}
+
+.object-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.object-detail-header h2 {
+    margin: 0;
+    color: #388e3c;
+    font-size: 22px;
+}
+
+.object-detail-header button {
+    padding: 6px 14px;
+    background-color: transparent;
+    color: #388e3c;
+    border: 2px solid #388e3c;
+    border-radius: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.object-detail-header button:hover {
+    background-color: #ffffff;
+    transform: scale(1.05);
+}
+
+/* List Group Styles */
+.list-group {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.total-orders-item,
+.balance-item,
+.profit-item {
+    padding: 20px;
+    background-color: #e8f5e9;
+    border-radius: 15px;
+    flex: 1;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+}
+
+.total-orders-item h3,
+.balance-item h3,
+.profit-item h3 {
+    margin-bottom: 12px;
+    color: #388e3c;
+}
+
+/* img */
+
+.img-1 {
+    width: 30px;
+    height: 30px;
+    overflow: hidden;
+    margin-left: 10px;
+    display: flex;
+    border-radius: 5px;
+    flex-direction: row;
+}
+
+.img-1 img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Chart Section Style */
+.charts {
+    display: flex;
+    gap: 20px;
+}
+
+.line-chart,
+.donut-chart {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Medium Devices - Tablets (Landscape) - 1024px */
+@media (max-width: 1024px) {
+    .main-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 15px;
+    }
+
+    .account-container {
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .object-detail {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .charts {
+        flex-direction: row;
+    }
+
+}
+
+/* Tablets and Small Screens - 768px */
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 15px;
+    }
+
+    .account-container {
+        width: 95%;
+        /* reduced width */
+        max-height: 200px;
+        /* set a max height for scroll */
+        overflow-y: auto;
+        /* enables vertical scroll */
+        margin-bottom: 10px;
+    }
+
+    .object-detail {
+        flex: 1;
+        margin-top: 0;
+        padding: 20px;
+    }
+
+    .list-group {
+        flex-direction: column;
+    }
+
+    .total-orders-item,
+    .balance-item,
+    .profit-item {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .charts {
+        flex-direction: column;
+    }
+}
+
+/* Mobile Devices - 425px */
+@media (max-width: 425px) {
+    .main-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 15px;
+    }
+
+}

@@ -4,8 +4,13 @@
 
     <!-- Accounts Section -->
     <div class="account-container">
+        <div class="account-header">
+            <h1>Accounts</h1>
+            <div>
+                <p>Total user Profit: {{ accounts.length }}</p>
+            </div>
+        </div>
 
-        <h1>Accounts</h1>
         <div v-if="accounts.length > 0">
             <div v-for="account in accounts" :key="account.id" class="account-item" :class="{ selected: selectedAccountId === account.id }" @click="showDetails(account)">
 
@@ -35,6 +40,8 @@
                 <button @click="logout">LogOut</button>
             </div>
             <br />
+
+            <!--! for Orders Items  -->
             <div class="list-group">
                 <div class="total-orders-item">
                     <h3>Total Orders Positions</h3>
@@ -55,13 +62,22 @@
                     <h3>Total Profit</h3>
                     <p>{{ formatCurrency(detailObj.profit) }}</p>
                 </div>
+
+                <div class="profit-item">
+                    <h3>A User Profit</h3>
+                    <div>
+                        <p>
+                            {{ formatCurrency(totalAllUserProfit) }}
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            <!-- Chart Section -->
+            <!--! Chart Section -->
             <div class="charts">
 
                 <div class="line-chart" style="flex: 2">
-                    <h3>Positions, Orders, and Deals Trend</h3>
+                    <h3>Positions, Orders, and Deals </h3>
                     <apexchart type="line" height="350" :options="chartOptions" :series="series" />
                 </div>
 
@@ -79,95 +95,95 @@
 import axios from 'axios';
 import VueApexCharts from 'vue3-apexcharts';
 import Loader from './Loader.vue';
-import {
-    mapGetters
-} from 'vuex'
+import './Dashboard.css'; // Import your CSS file 
+
+
+// user for environment variables
+const BASE_URL = process.env.VUE_APP_API_BASE_URL;
 
 export default {
     name: 'DASHBOARD',
     components: {
         apexchart: VueApexCharts,
-        Loader,
+        Loader, 
     },
 
-    
     data() {
         return {
             accounts: [],
             detailObj: [],
             donutChartSeries: [],
             selectedAccountId: null,
+            totalAllUserProfit: 0,
+            isLoading: false,
 
-            // Line Chart Options 
+            // chart 1
             chartOptions: {
                 chart: {
                     type: 'line',
-                    height: 350,
+                    height: 350
                 },
-
                 stroke: {
                     curve: 'smooth',
-                    width: 2,
+                    width: 2
                 },
                 markers: {
-                    size: 4,
+                    size: 4
                 },
                 dataLabels: {
-                    enabled: false,
+                    enabled: false
                 },
                 xaxis: {
                     type: 'datetime',
                     labels: {
-                        format: 'dd MMM',
+                        format: 'dd MMM'
                     },
                     tickAmount: 7,
                 },
                 yaxis: {
                     title: {
-                        text: 'Count',
-                    },
+                        text: 'Count'
+                    }
                 },
                 tooltip: {
                     x: {
-                        format: 'dd MMM yyyy HH:mm',
+                        format: 'dd MMM yyyy HH:mm'
                     },
                     y: {
-                        formatter: function (val) {
-                            return val;
-                        },
+                        formatter: val => val
                     },
                 },
             },
             series: [{
                     name: 'Positions',
-                    data: [],
+                    data: []
                 },
                 {
                     name: 'Orders',
-                    data: [],
+                    data: []
                 },
                 {
                     name: 'Deals',
-                    data: [],
+                    data: []
                 },
             ],
+            Image: require('../assets/time-to-market.gif'),
 
-            Image: require("../assets/time-to-market.gif"),
 
-            // Donut Chart Options
+            //chart 2
             donutChartOptions: {
                 chart: {
                     height: 350,
-                    type: 'radialBar',
+                    type: 'radialBar'
                 },
                 plotOptions: {
                     radialBar: {
                         dataLabels: {
                             name: {
-                                fontSize: '22px',
+                                fontSize: '22px'
                             },
                             value: {
-                                fontSize: '16px',
+                                fontSize: '16px'
                             },
                             total: {
                                 show: true,
@@ -181,35 +197,12 @@ export default {
                 },
                 labels: ['Trades', 'Pending'],
             },
-            isLoading: false,
         };
     },
 
     methods: {
 
-        // Accounts section
-        async fetchAccounts() {
-            this.isLoading = true;
-            try {
-                const tokenString = localStorage.getItem('token');
-                if (!tokenString) {
-                    console.error('No token found. Please log in.');
-                    return;
-                }
-
-                const response = await axios.get('https://dev.hstrader.com/api/v1/accounts', {
-                    headers: {
-                        Authorization: `Bearer ${tokenString}`,
-                    },
-                });
-
-                this.accounts = response.data.data;
-            } catch (error) {
-                console.error('Error fetching accounts:', error);
-            }
-            this.isLoading = false;
-        },
-
+        // Show Details
         async showDetails(account) {
             this.selectedAccountId = account.id;
             this.detailObj = {
@@ -223,25 +216,75 @@ export default {
             await this.fetchOrdersAndPositions(account.id);
         },
 
-        logout() {
-            localStorage.removeItem('token');
-            this.$router.push('/');
+
+        // Fetch Accounts
+        async fetchAccounts() {
+            this.isLoading = true;
+            try {
+                const tokenString = localStorage.getItem('token');
+                if (!tokenString) return;
+
+                const response = await axios.get(`${BASE_URL}/api/v1/accounts`, {
+                    headers: {
+                        Authorization: `Bearer ${tokenString}`,
+                    },
+                });
+
+                this.accounts = response.data.data;
+                await this.calculateTotalUserProfit();
+            } catch (error) {
+                console.error('Error fetching accounts:', error);
+            }
+            this.isLoading = false;
+
         },
 
+        async calculateTotalUserProfit() {
+            const tokenString = localStorage.getItem('token');
+                if (!tokenString) return;
+
+            let totalProfit = 0;
+
+            // Fetch Positions for each account
+            for (const account of this.accounts) {
+                try {
+                    const response = await axios.get(`${BASE_URL}/api/v1/Positions/accounts/${account.id}`, {
+                        headers: {
+                            Authorization: `Bearer ${tokenString}`,
+                        },
+                        params: {
+                            page: 1,
+                            limit: 500,
+                            active: 'false'
+                        },
+                    });
+
+                    const Positions = response.data.data;
+                    Positions.forEach(position => {
+                        totalProfit += Number(position.profit || 0);
+                    });
+                } catch (err) {
+                    console.error(`Failed to fetch Positions for account ${account.id}:`, err);
+                }
+            }
+
+            this.totalAllUserProfit = totalProfit;
+        },
+
+
+        // User Chart Page Img
         img() {
             this.$router.push('/userchart/' + this.selectedAccountId);
         },
 
-        // Orders,Positions and Deals section
         async fetchOrdersAndPositions(accountId) {
             try {
                 const tokenString = localStorage.getItem('token');
-                if (!tokenString) {
-                    console.error('No token found. Please log in.');
-                    return;
-                } 
+                if (!tokenString) return;
 
                 this.isLoading = true;
+
+                //Fetch the Data
                 const [
                     responsePosition,
                     responseOrder,
@@ -250,107 +293,103 @@ export default {
                     responsePending,
                     responseSymbols,
                 ] = await Promise.all([
-                    axios.get(`https://dev.hstrader.com/api/v1/positions/accounts/${accountId}`, {
+                    axios.get(`${BASE_URL}/api/v1/positions/accounts/${accountId}`, {
                         headers: {
-                            Authorization: `Bearer ${tokenString}`,
+                            Authorization: `Bearer ${tokenString}`
                         },
                         params: {
                             page: 1,
                             limit: 500,
-                            active: 'false',
+                            active: 'false'
                         },
                     }),
-                    axios.get(`https://dev.hstrader.com/api/v1/orders/accounts/${accountId}`, {
+                    axios.get(`${BASE_URL}/api/v1/orders/accounts/${accountId}`, {
                         headers: {
-                            Authorization: `Bearer ${tokenString}`,
+                            Authorization: `Bearer ${tokenString}`
                         },
                         params: {
                             page: 1,
                             limit: 500,
-                            active: 'false',
+                            active: 'false'
                         },
                     }),
-                    axios.get(`https://dev.hstrader.com/api/v1/deals/accounts/${accountId}`, {
+                    axios.get(`${BASE_URL}/api/v1/deals/accounts/${accountId}`, {
                         headers: {
-                            Authorization: `Bearer ${tokenString}`,
+                            Authorization: `Bearer ${tokenString}`
                         },
                         params: {
                             page: 1,
-                            limit: 500,
+                            limit: 500
                         },
                     }),
-                    axios.get(`https://dev.hstrader.com/api/v1/positions/accounts/${accountId}`, {
+                    axios.get(`${BASE_URL}/api/v1/positions/accounts/${accountId}`, {
                         headers: {
-                            Authorization: `Bearer ${tokenString}`,
+                            Authorization: `Bearer ${tokenString}`
                         },
                         params: {
                             page: 0,
                             limit: 0,
-                            active: 'true',
+                            active: 'true'
                         },
                     }),
-                    axios.get(`https://dev.hstrader.com/api/v1/orders/accounts/${accountId}`, {
+                    axios.get(`${BASE_URL}/api/v1/orders/accounts/${accountId}`, {
                         headers: {
-                            Authorization: `Bearer ${tokenString}`,
+                            Authorization: `Bearer ${tokenString}`
                         },
                         params: {
                             page: 1,
                             limit: 500,
-                            active: 'true',
+                            active: 'true'
                         },
                     }),
-                    axios.get(`https://dev.hstrader.com/api/v1/symbols/accounts/${accountId}`, {
+                    axios.get(`${BASE_URL}/api/v1/symbols/accounts/${accountId}`, {
                         headers: {
-                            Authorization: `Bearer ${tokenString}`,
+                            Authorization: `Bearer ${tokenString}`
                         },
                     }),
                 ]);
-                this.isLoading = false;
 
-                // Extract values from response
+                // Data Formatting
                 const trades = responseTrades.data.data.length;
                 const pending = responsePending.data.data.length;
                 const positions = responsePosition.data.data;
                 const orders = responseOrder.data.data;
                 const deals = responseDeals.data.data;
 
-                // console Values
-                console.log('Positions:', positions);
-                console.log('Orders:', orders);
-                console.log('Deals:', deals);
-                console.log('Trades:', trades);
-                console.log('Pending:', pending);
-
-                
+                // set the data to the store*
                 this.$store.dispatch('setSymbols', responseSymbols.data.data);
 
-                // Total profit calculation
+                // Calculate user total profit
                 let totalProfit = 0;
                 positions.forEach((position) => {
                     totalProfit += Number(position.profit || 0);
                 });
 
+                // Set the data to the detailObj
                 this.detailObj.positions = positions;
                 this.detailObj.orders = orders;
                 this.detailObj.deals = deals;
                 this.detailObj.profit = totalProfit;
 
-                // Update the donut chart series 
+                //chart data
                 this.donutChartSeries = [trades, pending];
 
                 this.updateChart();
+
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
+            this.isLoading = false;
+
         },
 
-        //line chart Update
+        // Update the chart with the new data
         updateChart() {
             const groupByDay = (items) => {
                 const grouped = {};
                 items.forEach((item) => {
                     const ms = item.created_at / 1_000_000;
-                    const dateStr = new Date(ms).toISOString().split('T')[0]; // only YYYY-MM-DD
+                    const dateStr = new Date(ms).toISOString().split('T')[0];
                     if (!grouped[dateStr]) {
                         grouped[dateStr] = 0;
                     }
@@ -368,19 +407,20 @@ export default {
 
             this.series = [{
                     name: 'Positions',
-                    data: positionSeries,
+                    data: positionSeries
                 },
                 {
                     name: 'Orders',
-                    data: orderSeries,
+                    data: orderSeries
                 },
                 {
                     name: 'Deals',
-                    data: dealSeries,
+                    data: dealSeries
                 },
             ];
         },
 
+        // Format currency
         formatCurrency(value) {
             if (!value) return '$0.00';
             return `$ ${Number(value).toLocaleString(undefined, {
@@ -388,259 +428,17 @@ export default {
         maximumFractionDigits: 2,
       })}`;
         },
+
+         // Logout Button
+    logout() {
+        localStorage.removeItem('token');
+        this.$router.push('/');
     },
+    },
+
     mounted() {
         this.fetchAccounts();
     },
-    computed: {
-        ...mapGetters(['count']),
-    },
+
 };
 </script>
-
-<style scoped>
-/* main-container Style */
-.main-container {
-height: 90vh;
-    display: flex;
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Account Section Style */
-.account-container {
-    width: 300px;
-    overflow-y: auto;
-
-    border-radius: 12px;
-    border: 5px solid #ddd;
-    background: #ffffff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-    padding: 20px;
-
-}
-
-.account-item {
-    padding: 12px;
-    margin-bottom: 12px;
-    background-color: #f7f7f7;
-    border-radius: 15px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.account-item.selected {
-    outline: 3px solid #80deea;
-    background-color: #e1f5fe;
-    transform: scale(1.03);
-}
-
-.account-details {
-    margin-top: 6px;
-    padding: 12px;
-    font-size: 14px;
-    color: #7b8d8e;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 8px;
-}
-
-.account-info {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-/* object Section Style */
-.object-detail {
-    margin-left: 24px;
-    padding: 25px;
-    border-radius: 16px;
-    border: 5px solid #ddd;
-    background: #ffffff;
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
-    flex: 1;
-}
-
-.object-detail-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.object-detail-header h2 {
-    margin: 0;
-    color: #388e3c;
-    font-size: 22px;
-}
-
-.object-detail-header button {
-    padding: 6px 14px;
-    background-color: transparent;
-    color: #388e3c;
-    border: 2px solid #388e3c;
-    border-radius: 12px;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.object-detail-header button:hover {
-    background-color: #ffffff;
-    transform: scale(1.05);
-}
-
-/* List Group Styles */
-.list-group {
-    display: flex;
-    gap: 18px;
-    margin-bottom: 24px;
-}
-
-.total-orders-item,
-.balance-item,
-.profit-item {
-    padding: 20px;
-    background-color: #e8f5e9;
-    border-radius: 15px;
-    flex: 1;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
-}
-
-.total-orders-item h3,
-.balance-item h3,
-.profit-item h3 {
-    margin-bottom: 12px;
-    color: #388e3c;
-}
-
-/* img */
-
-.img-1 {
-    width: 30px;
-    height: 30px;
-    overflow: hidden;
-    margin-left: 10px;
-    display: flex;
-    border-radius: 5px;
-    flex-direction: row;
-}
-
-.img-1 img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-/* Chart Section Style */
-.charts {
-    display: flex;
-    gap: 20px;
-}
-
-.line-chart,
-.donut-chart {
-    background: #ffffff;
-    border-radius: 16px; 
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
-}
-
-/* Fade Animation */
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.4s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-}
-
-/* Slide-in Animation */
-.slide-fade-enter-active {
-    transition: all 0.5s ease;
-}
-
-.slide-fade-enter-from {
-    opacity: 0;
-    transform: translateY(10px);
-}
-
-.slide-fade-leave-active {
-    transition: all 0.3s ease;
-}
-
-.slide-fade-leave-to {
-    opacity: 0;
-    transform: translateY(10px);
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .main-container {
-        flex-direction: column;
-        padding: 10px;
-    }
-
-    .account-container {
-        width: 100%;
-        height: 70vh;
-        margin-bottom: 20px;
-        overflow-y: auto;
-    }
-
-    .object-detail {
-        margin-left: 0;
-        width: 100%;
-    }
-
-    .list-group {
-        flex-direction: column;
-    }
-
-    .charts {
-        flex-direction: column;
-    }
-
-    .line-chart,
-    .donut-chart {
-        width: 100%;
-    }
-
-    .object-detail-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-}
-
-@media (max-width: 600px) {
-    .account-container {
-        height: 70vh;
-        width: 100%;
-        overflow-y: auto;
-    }
-
-    .account-item {
-        font-size: 14px;
-    }
-
-    .account-details {
-        font-size: 12px;
-    }
-
-    .total-orders-item h3,
-    .balance-item h3,
-    .profit-item h3 {
-        font-size: 16px;
-    }
-
-    .object-detail-header h2 {
-        font-size: 18px;
-    }
-}
-</style>
